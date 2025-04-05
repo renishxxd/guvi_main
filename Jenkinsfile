@@ -1,5 +1,6 @@
 pipeline {
     agent any
+
     environment {
         DOCKER_IMAGE = "renish38/myapp:latest"
         DOCKER_USER = "renish38"
@@ -7,50 +8,62 @@ pipeline {
         KUBECONFIG = "C:\\Users\\renis\\.kube\\config"
         NO_PROXY = "localhost,127.0.0.1,docker.io,registry-1.docker.io"
     }
+
     stages {
         stage('Clone Repository') {
             steps {
                 git branch: 'main', url: 'https://github.com/renishxxd/guvi_main.git'
             }
         }
+
         stage('Check Workspace Files') {
             steps {
                 powershell 'dir'
             }
         }
+
         stage('Build Docker Image') {
             steps {
                 powershell 'docker build -t $env:DOCKER_IMAGE .'
             }
         }
+
         stage('Login to Docker Hub') {
             steps {
                 powershell 'docker login -u $env:DOCKER_USER -p $env:DOCKER_PASS'
             }
         }
+
         stage('Push to Docker Hub') {
             steps {
                 powershell 'docker push $env:DOCKER_IMAGE'
             }
         }
+
         stage('Deploy to Minikube') {
             steps {
                 powershell '''
-                    if (-not (kubectl get deployment myapp -ErrorAction SilentlyContinue)) {
+                    $ErrorActionPreference = "SilentlyContinue"
+
+                    if (-not (kubectl get deployment myapp)) {
                         kubectl create deployment myapp --image=$env:DOCKER_IMAGE --dry-run=client -o yaml | Out-File -Encoding UTF8 deployment.yaml
-                        kubectl apply -f deployment.yaml
+                    }
+
+                    kubectl apply -f deployment.yaml
+
+                    if (-not (kubectl get service myapp)) {
                         kubectl expose deployment myapp --type=NodePort --port=80
                     } else {
-                        Write-Host "Deployment already exists. Skipping deployment creation."
+                        Write-Host "Service already exists. Skipping exposure."
                     }
                 '''
             }
         }
-        stage('Get Service URL') {
-    steps {
-        powershell '"C:\\Users\\renis\\AppData\\Local\\Microsoft\\WindowsApps\\minikube.exe" service myapp --url'
-    }
-}
 
+        stage('Get Service URL') {
+            steps {
+                powershell '"C:\\Users\\renis\\AppData\\Local\\Microsoft\\WindowsApps\\minikube.exe" service myapp --url'
+            }
+        }
     }
 }
