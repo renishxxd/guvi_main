@@ -1,5 +1,6 @@
 pipeline {
     agent any
+
     environment {
         DOCKER_IMAGE = "renish38/myapp:latest"
         DOCKER_USER = "renish38"
@@ -7,6 +8,7 @@ pipeline {
         KUBECONFIG = "C:\\Users\\renis\\.kube\\config"
         PATH = "C:\\minikube;${env.PATH}" // Add Minikube folder to PATH
     }
+
     stages {
         stage('Clone Repository') {
             steps {
@@ -41,7 +43,8 @@ pipeline {
         stage('Deploy to Minikube') {
             steps {
                 powershell '''
-                    if (-not (kubectl get deployment myapp --ignore-not-found)) {
+                    $exists = kubectl get deployment myapp --ignore-not-found
+                    if (-not $exists) {
                         kubectl create deployment myapp --image=$env:DOCKER_IMAGE --dry-run=client -o yaml | Out-File -Encoding UTF8 deployment.yaml
                         kubectl apply -f deployment.yaml
                         kubectl expose deployment myapp --type=NodePort --port=80
@@ -54,7 +57,7 @@ pipeline {
 
         stage('Get Service URL') {
             steps {
-                powershell '"C:\\minikube\\minikube.exe" service myapp --url'
+                powershell '& "C:\\minikube\\minikube.exe" service myapp --url'
             }
         }
     }
