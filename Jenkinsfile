@@ -39,18 +39,20 @@ pipeline {
         }
 
         stage('Deploy to Minikube') {
-            steps {
-                powershell '''
-                    if (-Not (kubectl get deployment myapp -ErrorAction SilentlyContinue)) {
-                        kubectl create deployment myapp --image=$env:DOCKER_IMAGE --dry-run=client -o yaml > deployment.yaml
-                        kubectl apply -f deployment.yaml
-                        kubectl expose deployment myapp --type=NodePort --port=80
-                    } else {
-                        Write-Host "Deployment already exists. Skipping deployment creation."
-                    }
-                '''
+    steps {
+        powershell '''
+            $deploy = kubectl get deployment myapp 2>$null
+            if (-not $?) {
+                kubectl create deployment myapp --image=$env:DOCKER_IMAGE --dry-run=client -o yaml > deployment.yaml
+                kubectl apply -f deployment.yaml
+                kubectl expose deployment myapp --type=NodePort --port=80
+            } else {
+                Write-Host "Deployment already exists. Skipping deployment creation."
             }
-        }
+        '''
+    }
+}
+
 
         stage('Get Service URL') {
             steps {
