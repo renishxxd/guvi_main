@@ -1,17 +1,16 @@
-# Use official Node.js image
+# Use Node.js base image
 FROM node:16
 
 # Set working directory
 WORKDIR /app
 
-# Copy package.json and install dependencies
-COPY package.json package-lock.json ./
-RUN npm install
-
-# Copy all project files
+# Copy all project files into the container
 COPY . .
 
-# Expose port 3000 (or change if needed)
+# Optional: If you *do* have a node_modules folder, skip installing anything
+RUN echo "No package.json found, skipping npm install"
+
+# Expose the port your server listens on (update if not 3000)
 EXPOSE 3000
 
 # Start the server
