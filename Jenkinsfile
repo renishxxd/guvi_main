@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/renishxxd/guvi_main.git' // Replace with your repo
+                git branch: 'main', url: 'https://github.com/renishxxd/guvi_main.git'
             }
         }
 
