@@ -8,9 +8,18 @@ pipeline {
     }
 
     stages {
+
         stage('Clone Repository') {
             steps {
-                git branch: 'main', url: 'https://github.com/renishxxd/guvi_main.git'
+                git branch: 'main', 
+                    url: 'https://github.com/renishxxd/guvi_main.git', 
+                    shallow: false
+            }
+        }
+
+        stage('Check Workspace Files') {
+            steps {
+                powershell 'dir'
             }
         }
 
@@ -35,10 +44,14 @@ pipeline {
         stage('Deploy to Minikube') {
             steps {
                 powershell '''
-                minikube start
-                kubectl create deployment myapp --image=$env:DOCKER_IMAGE --dry-run=client -o yaml > deployment.yaml
-                kubectl apply -f deployment.yaml
-                kubectl expose deployment myapp --type=NodePort --port=80
+                    minikube start
+                    if (-Not (kubectl get deployment myapp -ErrorAction SilentlyContinue)) {
+                        kubectl create deployment myapp --image=$env:DOCKER_IMAGE --dry-run=client -o yaml > deployment.yaml
+                        kubectl apply -f deployment.yaml
+                        kubectl expose deployment myapp --type=NodePort --port=80
+                    } else {
+                        Write-Host "Deployment already exists. Skipping deployment creation."
+                    }
                 '''
             }
         }
