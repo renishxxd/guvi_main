@@ -4,6 +4,7 @@ pipeline {
         DOCKER_IMAGE = "renish38/myapp:latest"
         DOCKER_USER = "renish38"
         DOCKER_PASS = "renish40#"
+        KUBECONFIG = "C:\\Users\\renis\\.kube\\config"
         NO_PROXY = "localhost,127.0.0.1,docker.io,registry-1.docker.io"
     }
     stages {
@@ -12,31 +13,26 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/renishxxd/guvi_main.git'
             }
         }
-
         stage('Check Workspace Files') {
             steps {
                 powershell 'dir'
             }
         }
-
         stage('Build Docker Image') {
             steps {
                 powershell 'docker build -t $env:DOCKER_IMAGE .'
             }
         }
-
         stage('Login to Docker Hub') {
             steps {
                 powershell 'docker login -u $env:DOCKER_USER -p $env:DOCKER_PASS'
             }
         }
-
         stage('Push to Docker Hub') {
             steps {
                 powershell 'docker push $env:DOCKER_IMAGE'
             }
         }
-
         stage('Deploy to Minikube') {
             steps {
                 powershell '''
@@ -50,7 +46,6 @@ pipeline {
                 '''
             }
         }
-
         stage('Get Service URL') {
             steps {
                 powershell 'minikube service myapp --url'
