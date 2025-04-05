@@ -47,9 +47,10 @@ pipeline {
             }
         }
         stage('Get Service URL') {
-            steps {
-                powershell 'minikube service myapp --url'
-            }
-        }
+    steps {
+        powershell '"C:\\Users\\renis\\AppData\\Local\\Microsoft\\WindowsApps\\minikube.exe" service myapp --url'
+    }
+}
+
     }
 }
