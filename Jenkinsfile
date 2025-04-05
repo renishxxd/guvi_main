@@ -11,9 +11,7 @@ pipeline {
 
         stage('Clone Repository') {
             steps {
-                git branch: 'main', 
-                    url: 'https://github.com/renishxxd/guvi_main.git', 
-                    shallow: false
+                git branch: 'main', url: 'https://github.com/renishxxd/guvi_main.git'
             }
         }
 
