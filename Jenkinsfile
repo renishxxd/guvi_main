@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKER_IMAGE = "renish38/myapp:latest"
         DOCKER_USER = "renish38"
-        DOCKER_PASS = "renish40"
+        DOCKER_PASS = "renish40#"
     }
 
     stages {
