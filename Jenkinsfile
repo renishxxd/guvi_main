@@ -38,12 +38,11 @@ pipeline {
             }
         }
 
-        stage('Deploy to Minikube') {
+       stage('Deploy to Minikube') {
     steps {
         powershell '''
-            $deploy = kubectl get deployment myapp 2>$null
-            if (-not $?) {
-                kubectl create deployment myapp --image=$env:DOCKER_IMAGE --dry-run=client -o yaml > deployment.yaml
+            if (-not (kubectl get deployment myapp -ErrorAction SilentlyContinue)) {
+                kubectl create deployment myapp --image=$env:DOCKER_IMAGE --dry-run=client -o yaml | Out-File -Encoding UTF8 deployment.yaml
                 kubectl apply -f deployment.yaml
                 kubectl expose deployment myapp --type=NodePort --port=80
             } else {
@@ -52,6 +51,7 @@ pipeline {
         '''
     }
 }
+
 
 
         stage('Get Service URL') {
