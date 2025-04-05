@@ -1,12 +1,11 @@
 pipeline {
     agent any
-
     environment {
         DOCKER_IMAGE = "renish38/myapp:latest"
         DOCKER_USER = "renish38"
         DOCKER_PASS = "renish40#"
+        NO_PROXY = "localhost,127.0.0.1,docker.io,registry-1.docker.io"
     }
-
     stages {
         stage('Clone Repository') {
             steps {
@@ -43,7 +42,7 @@ pipeline {
                 powershell '''
                     if (-not (kubectl get deployment myapp -ErrorAction SilentlyContinue)) {
                         kubectl create deployment myapp --image=$env:DOCKER_IMAGE --dry-run=client -o yaml | Out-File -Encoding UTF8 deployment.yaml
-                        kubectl apply -f deployment.yaml --validate=false
+                        kubectl apply -f deployment.yaml
                         kubectl expose deployment myapp --type=NodePort --port=80
                     } else {
                         Write-Host "Deployment already exists. Skipping deployment creation."
