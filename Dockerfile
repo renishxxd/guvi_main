@@ -1,7 +1,18 @@
-FROM nginx:latest
-# Copy the built files from the previous stage
-COPY build/ /usr/share/nginx/html
-# Expose port 80 (the default HTTP port)
-EXPOSE 80
-# Start Nginx and keep it running in the foreground
-CMD ["nginx", "-g", "daemon off;"]
+# Use official Node.js image
+FROM node:16
+
+# Set working directory
+WORKDIR /app
+
+# Copy package.json and install dependencies
+COPY package.json package-lock.json ./
+RUN npm install
+
+# Copy all project files
+COPY . .
+
+# Expose port 3000 (or change if needed)
+EXPOSE 3000
+
+# Start the server
+CMD ["node", "server.js"]
